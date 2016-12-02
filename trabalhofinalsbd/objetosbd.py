@@ -7,6 +7,12 @@ import sqlalchemy
 import sys
 
 Base = declarative_base()
+# Gerar as classes na tabela:
+# Base.metadata.create_all(engine)
+# gabriel = Pessoa(cpf=123, nome='Gabriel'...)
+# session.add(gabriel)
+# session.commit()
+# print(gabriel.cpf)
 
 class Pessoa(Base):
     __tablename__ = 'Pessoa'
@@ -25,7 +31,7 @@ class Pessoa(Base):
 #"""
 class Professor(Base):
     __tablename__ = 'Professor'
-    cpf = Column(Integer, ForeignKey('Pessoa.cpf'), unique=True, nullable=False)
+    cpf = Column(Integer, ForeignKey("Pessoa.cpf"), unique=True, nullable=False)
     siape = Column(Integer, primary_key=True)
     unidade_academica = Column(String, ForeignKey('Unidade_academica.sigla'))
     regime_trabalho = Column(Integer)
@@ -116,3 +122,5 @@ finally:
     if con:
         con.close()
 #"""
+
+print "doido"
