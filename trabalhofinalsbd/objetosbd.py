@@ -14,6 +14,11 @@ Base = declarative_base()
 # session.commit()
 # print(gabriel.cpf)
 
+class User(Base):
+    __tablename__ = 'Pessoa'
+    user = Column(String, primary_key=True)
+    passw = Column(String)
+
 class Pessoa(Base):
     __tablename__ = 'Pessoa'
     cpf = Column(Integer, primary_key=True)

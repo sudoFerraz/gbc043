@@ -26,6 +26,7 @@ def handle_cria_user():
     user = raw_input()
     print "Digite sua senha"
     passw = raw_input()
+    newuser =
     pass
 
 def handle_logon():
