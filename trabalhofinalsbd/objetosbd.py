@@ -5,17 +5,20 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey
 import sqlalchemy
 import sys
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
+
 # Gerar as classes na tabela:
-# Base.metadata.create_all(engine)
+
 # gabriel = Pessoa(cpf=123, nome='Gabriel'...)
 # session.add(gabriel)
 # session.commit()
 # print(gabriel.cpf)
 
 class User(Base):
-    __tablename__ = 'Pessoa'
+    __tablename__ = 'User'
     user = Column(String, primary_key=True)
     passw = Column(String)
 
@@ -26,7 +29,7 @@ class Pessoa(Base):
     emailinst = Column(String)
     emailsec = Column(String)
     datanasc = Column(String)
-    tipo = Column(String)
+    tipo = Column(Integer)
 
     def __repr__(self):
         return "<Pessoa(nome='%s', cpf='%s', email institucional='%s',\
@@ -65,7 +68,7 @@ class Terceirizado(Base):
     setor_atuacao = Column(String)
 
 class Unicade_academica(Base):
-    __tablename__ = 'Unidade Academica'
+    __tablename__ = 'Unidade_academica'
     sigla = Column(String, primary_key=True)
     nome = Column(String)
     area_conhecimento = Column(String)
@@ -77,7 +80,7 @@ class Curso(Base):
     unidade_academica = Column(String, ForeignKey('Unidade_academica.sigla'))
 
 class Unidade_administrativa(Base):
-    __tablename__ = 'Unidade Administrativa'
+    __tablename__ = 'Unidade_administrativa'
     sigla = Column(String, primary_key=True)
     nome = Column(String)
 
@@ -85,7 +88,7 @@ class Questao(Base):
     __tablename__ = 'Questao'
     descricao_pergunta = Column(String)
     identificador = Column(Integer, primary_key=True)
-    resposta = Column(Integer, ForeignKey('Resposta.id'))
+    resposta = Column(Integer, ForeignKey('Resposta.identificador'))
 
 class Resposta(Base):
     #0-1, sendo 1 como presente
@@ -109,23 +112,7 @@ class Formulario(Base):
     data_inicio = Column(String)
     data_final = Column(String)
 
-con = None
 
-try:
-    con = psycopg2.connect(database='trabalhosbd', user='trabalhosbd', \
-                           password='trabalhosbd', host='localhost')
-    cur = con.cursor()
-    cur.execute('SELECT version()')
-    ver = cur.fetchone()
-    print ver
-
-except psycopg2.DatabaseError, e:
-    print 'Error %s' % e
-    sys.exit(1)
-
-finally:
-    if con:
-        con.close()
-#"""
-
-print "doido"
+engine = create_engine('postgresql://trabalhosbd:trabalhosbd@localhost/trabalhosbd')
+Session = sessionmaker(bind=engine)
+Base.metadata.create_all(engine)

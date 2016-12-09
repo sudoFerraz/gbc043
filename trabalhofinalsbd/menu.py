@@ -1,3 +1,8 @@
+import auxiliary
+#import objetosbd.py
+import sqlalchemy
+
+
 """Interacao com usuario."""
 
 
@@ -8,7 +13,7 @@ class Menu_inicial(object):
         """Metodo inicial."""
         self.status = 'Nao logado'
         self.validoptions = [1, 2, 3, 4, 5, 0]
-        pass
+        self.Session = auxiliary.connect()
 
     def menu(self):
         """Definindo menu inicial."""
@@ -21,7 +26,7 @@ class Menu_inicial(object):
         print '\nSair do sistema [0]'
         selection = input()
         if selection == 1:
-            self.handle_cria_user()
+            auxiliary.handle_cria_user(self.Session)
         elif selection == 2:
             self.handle_logon()
         elif selection == 3:
