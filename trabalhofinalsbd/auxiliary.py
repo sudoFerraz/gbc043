@@ -5,6 +5,7 @@ import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from texttable import Texttable
+import uuid
 
 
 def populate_db():
@@ -165,7 +166,36 @@ def handle_answer(session, form, userlogged):
 
 
 def create_form(session, userlogged):
-    pass
+    print "Digite o nome do formulario"
+    formname = raw_input()
+    formcreator = userlogged
+    print "Digite para quem este formulario e destinado"
+    print "Use o formato: tecnicos, terceirizados / todos / professores"
+    formrestricao = raw_input()
+    formdatecriation = datetime.datetime.utcnow()
+    print "Digite a data de termino deste formulario"
+    print "Use o formato dd/mm/aaaa"
+    formdateend = raw_input()
+    formid = uuid.uuid4()
+    formid = hash(formid)
+    newform = objetosbd.Formulario(identificador=formid, nome=formname, criador=formcreator, \
+                                   restricao=formrestricao, data_criacao=formdatecriation, \
+                                   data_termino=formdateend)
+    session.add(newform)
+    print "Quantas questoes voce deseja adicionar?"
+    times = raw_input()
+    for i in xrange(0, times, 1):
+        print "Digite a descricao da pergunta"
+        newdesc = raw_input()
+        print "Digite a resposta para a pergunta: 1/0-2-5/sim/nao/blablblabla"
+        newanswer = raw_input()
+        questionid = uuid.uuid4()
+        questionid = hash(questionid)
+        newquestion = objetosbd.Questao(descricao=newdesc, identificador=questionid, \
+                                        id_formulario=formid)
+        newresposta = objetosbd.Respostas_Possiveis(id_questao=questionid, \
+                                                    resposta=newanswer)
+    session.commit()
 
 def handle_update():
     pass
