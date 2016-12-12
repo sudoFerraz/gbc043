@@ -195,7 +195,61 @@ def create_form(session, userlogged):
                                         id_formulario=formid)
         newresposta = objetosbd.Respostas_Possiveis(id_questao=questionid, \
                                                     resposta=newanswer)
+        session.add(newquestion)
+        session.add(newresposta)
     session.commit()
+
+def update_form(session, userlogged):
+    t = Texttable()
+    t.add_rows([['Descricao', 'Identificador']])
+    print "Digite o id do formulario que voce deseja alterar"
+    formid = raw_input()
+    for question in session.query(Questao).filter_by(id_formulario=formid):
+        t.add_rows([[question.descricao, question.identificador]])
+    t.draw()
+    print "\nDigite o id da questao que voce deseja alterar, ou (novo) para adicionar uma nova\
+    ou (delete) para deletar uma questao existente"
+    target = raw_input()
+    if target == 'novo':
+        print "Digite a descricao da questao nova"
+        newdesc = raw_input()
+        questionid = uuid.uuid4()
+        questionid = hash(newquestionid)
+        print "Digite a resposta para a pergunta: 1/0-2-5/sim/nao/blablblabla"
+        newanswer = raw_input()
+        newquestion = objetosbd.Questao(descricao=newdesc, identificador=questionid, \
+                                        id_formulario=formid)
+        newresposta = objetosbd.Respostas_Possiveis(id_questao=questionid, \
+                                                    resposta=newanswer)
+        session.add(newquestion)
+        session.add(newresposta)
+    elif target == 'delete':
+        print "Digite o id da questao que voce deseja deletar"
+        targetid = raw_input()
+        session.query(Questao).filter_by(identificador=targetid).delete()
+        session.flush()
+    else:
+        question = session.query(Questao).filter_by(identificador=target)
+        print "Digite a nova descricao da pergunta"
+        newdesc = raw_input()
+        print "Digite a nova resposta da pergunta"
+        newanswer = raw_input()
+        question.descricao = newdesc
+        respostaold = session.query(Respostas_Possiveis).filter_by(id_questao=question.identificador)
+        respostaold.resposta = newanswer
+        session.add(respostaold)
+        session.add(question)
+        session.flush()
+
+    session.commit()
+
+
+            #nao esquecer o commit final
+
+
+
+
+    pass
 
 def handle_update():
     pass
