@@ -139,16 +139,20 @@ def handle_logon(session):
         print "Usuario nao localizado, nao foi possivel efetuar o logon"
         return False
 
-def handle_answer(session, userlogado):
+def choose_form(session, userlogado):
     t = Texttable()
     t.add_rows([['Nome', 'Criador', 'Identificador', 'Restricao', 'Data criacao', 'Data Termino']])
     #nforms = session.query(Formulario).count()
     for form in session.query(Formulario).order_by(Formulario.data_criacao):
         t.add_rows([[form.nome, form.criador, form.restricao, form.data_criacao, form.data_termino]])
 
-    print forms.nome
-    print ""
+    print t.draw()
+    print "\nDigite o identificador do formulario que voce deseja responder"
     answer = raw_input()
+    auxiliary.handle_answer(session, answer, userlogado)
+
+def handle_answer(session, form, userlogged):
+    pass
 
 def handle_update():
     pass

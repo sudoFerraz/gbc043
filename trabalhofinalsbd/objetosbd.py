@@ -2,7 +2,7 @@
 
 import psycopg2
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Date
 import sqlalchemy
 import sys
 from sqlalchemy import create_engine
@@ -31,12 +31,7 @@ class Pessoa(Base):
     datanasc = Column(String)
     user = Column(String, ForeignKey('User.user'))
 
-    def __repr__(self):
-        return "<Pessoa(nome='%s', cpf='%s', email institucional='%s',\
-        data de nascimento='%s', tipo='%s')>" % (self.nome, self.cpf, \
-                                                 self.emailinst, self.datanasc,\
-                                                 self.tipo)
-#"""
+
 class Professor(Base):
     __tablename__ = 'Professor'
     cpf = Column(Integer, ForeignKey('Pessoa.cpf'), nullable=False)
@@ -62,7 +57,7 @@ class Tecnico(Base):
 
 class Terceirizado(Base):
     __tablename__ = 'Terceirizado'
-    cpf = Column(Integer, ForeignKey('Pessoa.cpf'), nullable=False)
+    cpf = Column(Integer, ForeignKey('Pessoa.cpf'), primary_key=True)
     empresa = Column(String)
     setor_atuacao = Column(String)
 
@@ -87,19 +82,19 @@ class Questao(Base):
     __tablename__ = 'Questao'
     descricao = Column(String)
     identificador = Column(Integer, primary_key=True)
-    id_formulario = Colum(Integer, ForeignKey('Formulario.identificador'), \
+    id_formulario = Column(Integer, ForeignKey('Formulario.identificador'), \
                           nullable=True)
 
 class Resposta(Base):
     #0-1, sendo 1 como presente
     __tablename__ = 'Resposta'
     cpf_respondedor = Column(Integer, ForeignKey('Pessoa,cpf'))
-    id_questao = Column(Integer, ForeignKey('Questao.identificador'))
+    id_questao = Column(Integer, ForeignKey('Questao.identificador'), primary_key=True)
     texto_resposta = Column(String)
 
 class Respostas_Possiveis(Base):
     __tablename__ = 'Respostas_Possiveis'
-    id_questao = Column(Integer, ForeignKey('Questao.identificador'))
+    id_questao = Column(Integer, ForeignKey('Questao.identificador'), primary_key=True)
     resposta = Column(String)
 
 class Formulario(Base):

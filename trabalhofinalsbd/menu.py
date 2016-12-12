@@ -36,7 +36,7 @@ class Menu_inicial(object):
             self.logged = auxiliary.handle_logon(session)
         elif selection == 3:
             check = auxiliary.checkdb(self.session, self.logged)
-            self.handle_answer(self.session, self.logged)
+            auxiliary.choose_form(self.session, self.logged)
         elif selection == 4:
             self.logged = self.handle_update(self.session, self.logged)
         if selection == 0:
