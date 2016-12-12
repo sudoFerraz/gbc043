@@ -152,6 +152,19 @@ def choose_form(session, userlogado):
     auxiliary.handle_answer(session, answer, userlogado)
 
 def handle_answer(session, form, userlogged):
+    for pess in session.query(Pessoa).filter_by(user=userlogged):
+        found = pess
+    for question in session.query(Questao).filter_by(id_formulario=form):
+        print question.descricao
+        print "\nResponda a seguir:"
+        answer = raw_input()
+        newanswer = objetosbd.Resposta(cpf_respondedor=found.cpf, id_questao=question.identificador, \
+                                       texto_resposta=answer)
+        session.add(newanswer)
+    session.commit()
+
+
+def create_form(session, userlogged):
     pass
 
 def handle_update():
