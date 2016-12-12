@@ -8,5 +8,8 @@ from sqlalchemy.orm import sessionmaker
 
 
 engine = create_engine('postgresql://trabalhosbd:trabalhosbd@localhost/trabalhosbd')
-Session = sessionmaker(bind=engine)
-newuser = User()
+Session = sessionmaker()
+engine.echo = False
+Session.configure(bind=engine)
+session = Session()
+print session.query(User)

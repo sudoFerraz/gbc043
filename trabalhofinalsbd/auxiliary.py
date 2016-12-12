@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from texttable import Texttable
 import uuid
+from objetosbd import User, Pessoa, Professor, Aluno, Tecnico, Terceirizado, Unidade_academica, Unidade_administrativa, Curso, Questao, Resposta, Respostas_Possiveis, Formulario
 
 
 def populate_db():
@@ -35,18 +36,21 @@ def handle_cria_user(session):
     newuser = objetosbd.User(user=usernew, passw=passwnew)
     session.add(newuser)
     session.commit()
+    session.flush()
+    return newuser.user
 
 def checkdb(session, userlogado):
     pass
 
 def handle_signup(session, userlogado):
     """Cadastra pessoa e commita no usuario certo."""
+    userlogado = str(userlogado)
     print "\nDigite seu nome"
     newnome = raw_input()
     print "\nDigite seu cpf"
     newcpf = raw_input()
     print "\nDigite seu email institucional"
-    newint = raw_input()
+    newinst = raw_input()
     print "\nDigite seu email secundario"
     newsec = raw_input()
     print "\nDigite sua data de nascimento"
@@ -82,8 +86,33 @@ def handle_signup(session, userlogado):
         newsig = raw_input()
         newpessoa = objetosbd.Pessoa(cpf=newcpf, nome=newnome, emailinst=newinst\
                                      , emailsec=newsec, datanasc=newdate, user=userlogado)
-        newaluno = objetosbd.Aluno(cpf=newcpf, nro_matricula=newmat, curso=newsig)
         session.add(newpessoa)
+        session.commit()
+        session.flush()
+        foundcurso = session.query(Curso).filter_by(sigla=newsig).first()
+        if not foundcurso:
+            print "Digite o nome do curso"
+            newcursoname = raw_input()
+            print "Digite a sigla da unidade academica atrelada ao curso"
+            newunidacad = raw_input()
+            foundunidadeacademica = session.query(Unidade_academica).filter_by(sigla=newunidacad).first()
+            if not foundunidadeacademica:
+                print "Digite o nome da unidade academica"
+                newnomeunidacad = raw_input()
+                print "Digite a area de conhecimento"
+                newareaconhecimento = raw_input()
+                newunidadeacademica = objetosbd.Unidade_academica(sigla=newunidacad, nome=newnomeunidacad, area_conhecimento=newareaconhecimento)
+                session.add(newunidadeacademica)
+                session.commit()
+                session.flush()
+            newcurso = objetosbd.Curso(sigla=newsig, nome=newcursoname,\
+                                       unidade_academica=newunidacad)
+            session.add(newcurso)
+            session.commit()
+            session.flush()
+
+        #newcurso = objetosbd.Curso(sigla=newsig,)
+        newaluno = objetosbd.Aluno(cpf=newcpf, nro_matricula=newmat, curso=newsig)
         session.add(newaluno)
         session.commit()
         print "Cadastro com sucesso, agora voce pode responder formularios"

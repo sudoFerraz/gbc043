@@ -43,8 +43,8 @@ class Professor(Base):
 class Aluno(Base):
     __tablename__ = 'Aluno'
     cpf = Column(Integer, ForeignKey('Pessoa.cpf'), nullable=False)
-    nro_matricula = Column(Integer, primary_key=True)
-    curso = Column(String)
+    nro_matricula = Column(String, primary_key=True)
+    curso = Column(String, ForeignKey('Curso.sigla'))
 
 class Tecnico(Base):
     __tablename__ = 'Tecnico'
@@ -61,7 +61,7 @@ class Terceirizado(Base):
     empresa = Column(String)
     setor_atuacao = Column(String)
 
-class Unicade_academica(Base):
+class Unidade_academica(Base):
     __tablename__ = 'Unidade_academica'
     sigla = Column(String, primary_key=True)
     nome = Column(String)

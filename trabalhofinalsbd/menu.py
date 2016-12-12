@@ -33,7 +33,7 @@ class Menu_inicial(object):
             auxiliary.handle_signup(self.Session, newuser)
             self.logged = newuser
         elif selection == 2:
-            self.logged = auxiliary.handle_logon(session)
+            self.logged = auxiliary.handle_logon(self.Session)
         elif selection == 3:
             check = auxiliary.checkdb(self.session, self.logged)
             auxiliary.choose_form(self.session, self.logged)
