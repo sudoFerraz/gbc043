@@ -29,7 +29,7 @@ class Pessoa(Base):
     emailinst = Column(String)
     emailsec = Column(String)
     datanasc = Column(String)
-    tipo = Column(Integer)
+    user = Column(String, ForeignKey('User.user'))
 
     def __repr__(self):
         return "<Pessoa(nome='%s', cpf='%s', email institucional='%s',\
@@ -39,7 +39,7 @@ class Pessoa(Base):
 #"""
 class Professor(Base):
     __tablename__ = 'Professor'
-    cpf = Column(Integer, ForeignKey("Pessoa.cpf"), unique=True, nullable=False)
+    cpf = Column(Integer, ForeignKey('Pessoa.cpf'), nullable=False)
     siape = Column(Integer, primary_key=True)
     unidade_academica = Column(String, ForeignKey('Unidade_academica.sigla'))
     regime_trabalho = Column(Integer)
@@ -47,13 +47,13 @@ class Professor(Base):
 
 class Aluno(Base):
     __tablename__ = 'Aluno'
-    cpf = Column(Integer, ForeignKey('Pessoa.cpf'), unique=True, nullable=False)
+    cpf = Column(Integer, ForeignKey('Pessoa.cpf'), nullable=False)
     nro_matricula = Column(Integer, primary_key=True)
     curso = Column(String)
 
 class Tecnico(Base):
     __tablename__ = 'Tecnico'
-    cpf = Column(Integer, ForeignKey('Pessoa.cpf'), unique=True, nullable=False)
+    cpf = Column(Integer, ForeignKey('Pessoa.cpf'), nullable=False)
     unidade_administrativa = Column(String, ForeignKey('Unidade_administrativa.sigla'),\
                                     nullable=True)
     unidade_academica = Column(String, ForeignKey('Unidade_academica.sigla'),\
@@ -62,8 +62,7 @@ class Tecnico(Base):
 
 class Terceirizado(Base):
     __tablename__ = 'Terceirizado'
-    cpf = Column(Integer, ForeignKey('Pessoa.cpf'), unique=True,\
-                 nullable=False, primary_key=True)
+    cpf = Column(Integer, ForeignKey('Pessoa.cpf'), nullable=False)
     empresa = Column(String)
     setor_atuacao = Column(String)
 
@@ -86,31 +85,31 @@ class Unidade_administrativa(Base):
 
 class Questao(Base):
     __tablename__ = 'Questao'
-    descricao_pergunta = Column(String)
+    descricao = Column(String)
     identificador = Column(Integer, primary_key=True)
-    resposta = Column(Integer, ForeignKey('Resposta.identificador'))
+    id_formulario = Colum(Integer, ForeignKey('Formulario.identificador'), \
+                          nullable=True)
 
 class Resposta(Base):
     #0-1, sendo 1 como presente
     __tablename__ = 'Resposta'
-    identificador = Column(Integer, primary_key=True)
-    texto = Column(String)
-    falso = Column(Integer)
-    verdadeiro = Column(Integer)
-    sim = Column(Integer)
-    nao = Column(Integer)
-    abstencao = Column(Integer)
-    multipla_escolha = Column(Integer) # tratar como uma lista
+    cpf_respondedor = Column(Integer, ForeignKey('Pessoa,cpf'))
+    id_questao = Column(Integer, ForeignKey('Questao.identificador'))
+    texto_resposta = Column(String)
+
+class Respostas_Possiveis(Base):
+    __tablename__ = 'Respostas_Possiveis'
+    id_questao = Column(Integer, ForeignKey('Questao.identificador'))
+    resposta = Column(String)
 
 class Formulario(Base):
     __tablename__ = 'Formulario'
-    questoes = Column(Integer, ForeignKey('Questao.identificador'))
     identificador = Column(Integer, primary_key=True)
     nome = Column(String)
-    preenchedor = Column(Integer, ForeignKey('Pessoa.cpf'))
-    restrito = Column(Integer) #1 prof, 2 aluno, 3 tec, 4 terceirizado
-    data_inicio = Column(String)
-    data_final = Column(String)
+    criador = Column(String)
+    restricao = Column(String)
+    data_criacao = Column(Date)
+    data_termino = Column(Date)
 
 
 engine = create_engine('postgresql://trabalhosbd:trabalhosbd@localhost/trabalhosbd')

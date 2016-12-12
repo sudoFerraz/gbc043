@@ -14,6 +14,7 @@ class Menu_inicial(object):
         self.status = 'Nao logado'
         self.validoptions = [1, 2, 3, 4, 5, 0]
         self.Session = auxiliary.connect()
+        self.logged = None
 
     def menu(self):
         """Definindo menu inicial."""
@@ -21,26 +22,29 @@ class Menu_inicial(object):
         print '\n[+] Escolha uma opcao para utilizar o lameDB [+]'
         print '\nCriar um novo usuario [1]'
         print '\nLogar com sua conta [2]'
-        print '\nResponder um questionario [3]'
+        print '\nResponder um formulario [3]'
         print '\nAtualizar usuario [4]'
+        print '\nCriar um formulario [5]'
+        print '\nAlterar um formulario [6]'
         print '\nSair do sistema [0]'
         selection = input()
         if selection == 1:
-            auxiliary.handle_cria_user(self.Session)
+            newuser = auxiliary.handle_cria_user(self.Session)
+            auxiliary.handle_signup(self.Session, newuser)
+            self.logged = newuser
         elif selection == 2:
-            self.handle_logon()
+            self.logged = auxiliary.handle_logon(session)
         elif selection == 3:
-            self.handle_answer()
+            check = auxiliary.checkdb(self.session, self.logged)
+            self.handle_answer(self.session, self.logged)
         elif selection == 4:
-            self.handle_update()
+            self.logged = self.handle_update(self.session, self.logged)
         if selection == 0:
             exit()
         if selection not in self.validoptions:
             print '\n[+] Opcao invalida, saindo do sistema [+]'
             exit()
 
-    def handle_cria_user(self):
-        """Criando novo usuario no postgre."""
 
 
 doido = Menu_inicial()
