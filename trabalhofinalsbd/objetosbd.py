@@ -88,7 +88,7 @@ class Questao(Base):
 class Resposta(Base):
     #0-1, sendo 1 como presente
     __tablename__ = 'Resposta'
-    cpf_respondedor = Column(Integer, ForeignKey('Pessoa,cpf'))
+    cpf_respondedor = Column(Integer, ForeignKey('Pessoa.cpf'), primary_key=True)
     id_questao = Column(Integer, ForeignKey('Questao.identificador'), primary_key=True)
     texto_resposta = Column(String)
 
@@ -103,8 +103,8 @@ class Formulario(Base):
     nome = Column(String)
     criador = Column(String)
     restricao = Column(String)
-    data_criacao = Column(Date)
-    data_termino = Column(Date)
+    data_criacao = Column(String)
+    data_termino = Column(String)
 
 
 engine = create_engine('postgresql://trabalhosbd:trabalhosbd@localhost/trabalhosbd')

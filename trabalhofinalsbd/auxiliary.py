@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from texttable import Texttable
 import uuid
 from objetosbd import User, Pessoa, Professor, Aluno, Tecnico, Terceirizado, Unidade_academica, Unidade_administrativa, Curso, Questao, Resposta, Respostas_Possiveis, Formulario
-
+from prettytable import PrettyTable
 
 def populate_db():
     pass
@@ -39,8 +39,6 @@ def handle_cria_user(session):
     session.flush()
     return newuser.user
 
-def checkdb(session, userlogado):
-    pass
 
 def handle_signup(session, userlogado):
     """Cadastra pessoa e commita no usuario certo."""
@@ -115,7 +113,7 @@ def handle_signup(session, userlogado):
         newaluno = objetosbd.Aluno(cpf=newcpf, nro_matricula=newmat, curso=newsig)
         session.add(newaluno)
         session.commit()
-        print "Cadastro com sucesso, agora voce pode responder formularios"
+        print "Cadastro com sucesso, agora voce pode responder formularios\n"
 
     if tipo == 3:
         tipo = "Tecnico"
@@ -148,50 +146,103 @@ def handle_signup(session, userlogado):
         print "Cadastro com sucesso, agora voce pode responder formularios"
 
 
+def checkdb(session, userlogado):
+    """Verifica se existe algum usuario logado, retorna bool."""
+    if not userlogado:
+        return False
+    else:
+        return True
+
+
+
 
 def handle_logon(session):
+    """Retorna o usuario se estiver logado, False se nao."""
     print "Digite seu user"
     usertry = raw_input()
     print "Digite sua senha"
     passwtry = raw_input()
     founduser = session.query(User).filter_by(user=usertry).first()
     if not founduser:
-        print "Usuario nao localizado, nao foi possivel efetuar o logon"
+        print "\nUsuario nao localizado, nao foi possivel efetuar o logon"
         return False
     if founduser.user == usertry:
         if founduser.passw == passwtry:
-            print "Logado como " + founduser.user
+            print "\nLogado como " + founduser.user
             return founduser.user
         else:
-            print "Usuario nao localizado, nao foi possivel efetuar o logon"
+            print "\nUsuario nao localizado, nao foi possivel efetuar o logon"
             return False
     else:
-        print "Usuario nao localizado, nao foi possivel efetuar o logon"
+        print "\nUsuario nao localizado, nao foi possivel efetuar o logon"
         return False
 
 def choose_form(session, userlogado):
-    t = Texttable()
-    t.add_rows([['Nome', 'Criador', 'Identificador', 'Restricao', 'Data criacao', 'Data Termino']])
+    j = PrettyTable(['Nome', 'Criador', 'Identificador', 'Restricao', 'Data criacao', 'Data Termino'])
+
+    #t = Texttable()
+    #t.add_rows([['Nome', 'Criador', 'Identificador', 'Restricao', 'Data criacao', 'Data Termino']])
     #nforms = session.query(Formulario).count()
     for form in session.query(Formulario).order_by(Formulario.data_criacao):
-        t.add_rows([[form.nome, form.criador, form.restricao, form.data_criacao, form.data_termino]])
+        j.add_row([form.nome, form.criador, form.identificador, form.restricao, form.data_criacao, form.data_termino])
 
-    print t.draw()
+    print j
     print "\nDigite o identificador do formulario que voce deseja responder"
     answer = raw_input()
-    auxiliary.handle_answer(session, answer, userlogado)
+    handle_answer(session, answer, userlogado)
 
 def handle_answer(session, form, userlogged):
+    print "Aqui"
+    control = 0
     for pess in session.query(Pessoa).filter_by(user=userlogged):
-        found = pess
+        found = pess.cpf
     for question in session.query(Questao).filter_by(id_formulario=form):
-        print question.descricao
+        for answerold in session.query(Resposta).filter_by(cpf_respondedor=found):
+            answerold2 = answerold.id_questao
+            questionidentificador = question.identificador
+            if answerold2 == questionidentificador:
+                print "\n\n"
+                f = PrettyTable(['Voce ja respondeu a esta questao'])
+                print f
+                return
+        print "\n\n"
+        j = PrettyTable(['Descricao>'])
+        j.add_row([question.descricao])
+        print j
         print "\nResponda a seguir:"
         answer = raw_input()
-        newanswer = objetosbd.Resposta(cpf_respondedor=found.cpf, id_questao=question.identificador, \
+        newanswer = objetosbd.Resposta(cpf_respondedor=found, id_questao=question.identificador, \
                                        texto_resposta=answer)
         session.add(newanswer)
+        #session.flush()
+
     session.commit()
+    print "--------------------------------------------------------------------"
+
+
+def show_answers(session, userlogged):
+    j = PrettyTable(['Nome', 'Criador', 'Identificador', 'Restricao', 'Data criacao', 'Data Termino'])
+
+    #t = Texttable()
+    #t.add_rows([['Nome', 'Criador', 'Identificador', 'Restricao', 'Data criacao', 'Data Termino']])
+    #nforms = session.query(Formulario).count()
+    for form in session.query(Formulario).order_by(Formulario.data_criacao):
+        j.add_row([form.nome, form.criador, form.identificador, form.restricao, form.data_criacao, form.data_termino])
+
+    print j
+    print "\nDigite o identificador do formulario que voce deseja responder"
+    formid = raw_input()
+    for question in session.query(Questao).filter_by(id_formulario=formid):
+        questionid = question.identificador
+        for answer in session.query(Resposta).filter_by(id_questao=questionid):
+            g = PrettyTable(['Cpf Respondedor', 'ID Questao', 'Texto resposta'])
+            g.add_row([answer.cpf_respondedor, answer.id_questao, answer.texto_resposta])
+
+    print g
+
+
+
+
 
 
 def create_form(session, userlogged):
@@ -201,18 +252,22 @@ def create_form(session, userlogged):
     print "Digite para quem este formulario e destinado"
     print "Use o formato: tecnicos, terceirizados / todos / professores"
     formrestricao = raw_input()
-    formdatecriation = datetime.datetime.utcnow()
+    formdatecriation = 27
     print "Digite a data de termino deste formulario"
     print "Use o formato dd/mm/aaaa"
     formdateend = raw_input()
     formid = uuid.uuid4()
     formid = hash(formid)
+    formid = abs(formid)
+    formid = str(formid)
+    formid = formid[:5]
+    formid = int(formid)
     newform = objetosbd.Formulario(identificador=formid, nome=formname, criador=formcreator, \
                                    restricao=formrestricao, data_criacao=formdatecriation, \
                                    data_termino=formdateend)
     session.add(newform)
     print "Quantas questoes voce deseja adicionar?"
-    times = raw_input()
+    times = input()
     for i in xrange(0, times, 1):
         print "Digite a descricao da pergunta"
         newdesc = raw_input()
@@ -220,22 +275,35 @@ def create_form(session, userlogged):
         newanswer = raw_input()
         questionid = uuid.uuid4()
         questionid = hash(questionid)
+        questionid = abs(questionid)
+        questionid = str(questionid)
+        questionid = questionid[:5]
+        questionid = int(questionid)
         newquestion = objetosbd.Questao(descricao=newdesc, identificador=questionid, \
                                         id_formulario=formid)
         newresposta = objetosbd.Respostas_Possiveis(id_questao=questionid, \
                                                     resposta=newanswer)
         session.add(newquestion)
         session.add(newresposta)
+        print "Formulario criado com sucesso"
     session.commit()
 
 def update_form(session, userlogged):
-    t = Texttable()
-    t.add_rows([['Descricao', 'Identificador']])
+    j = PrettyTable(['Nome', 'Criador', 'Identificador', 'Restricao', 'Data criacao', 'Data Termino'])
+
+    #t = Texttable()
+    #t.add_rows([['Nome', 'Criador', 'Identificador', 'Restricao', 'Data criacao', 'Data Termino']])
+    #nforms = session.query(Formulario).count()
+    for form in session.query(Formulario).order_by(Formulario.data_criacao):
+        j.add_row([form.nome, form.criador, form.identificador, form.restricao, form.data_criacao, form.data_termino])
+
+    print j
+    t = PrettyTable(['Descricao', 'Identificador'])
     print "Digite o id do formulario que voce deseja alterar"
     formid = raw_input()
     for question in session.query(Questao).filter_by(id_formulario=formid):
-        t.add_rows([[question.descricao, question.identificador]])
-    t.draw()
+        t.add_row([question.descricao, question.identificador])
+    print t
     print "\nDigite o id da questao que voce deseja alterar, ou (novo) para adicionar uma nova\
     ou (delete) para deletar uma questao existente"
     target = raw_input()
@@ -243,7 +311,12 @@ def update_form(session, userlogged):
         print "Digite a descricao da questao nova"
         newdesc = raw_input()
         questionid = uuid.uuid4()
-        questionid = hash(newquestionid)
+        questionid = hash(questionid)
+        questionid = abs(questionid)
+        questionid = str(questionid)
+        questionid = questionid[:5]
+        questionid = int(questionid)
+
         print "Digite a resposta para a pergunta: 1/0-2-5/sim/nao/blablblabla"
         newanswer = raw_input()
         newquestion = objetosbd.Questao(descricao=newdesc, identificador=questionid, \
@@ -255,16 +328,17 @@ def update_form(session, userlogged):
     elif target == 'delete':
         print "Digite o id da questao que voce deseja deletar"
         targetid = raw_input()
+        session.query(Resposta).filter_by(id_questao=targetid).delete()
         session.query(Questao).filter_by(identificador=targetid).delete()
         session.flush()
     else:
-        question = session.query(Questao).filter_by(identificador=target)
+        question = session.query(Questao).filter_by(identificador=target).first()
         print "Digite a nova descricao da pergunta"
         newdesc = raw_input()
         print "Digite a nova resposta da pergunta"
         newanswer = raw_input()
         question.descricao = newdesc
-        respostaold = session.query(Respostas_Possiveis).filter_by(id_questao=question.identificador)
+        respostaold = session.query(Respostas_Possiveis).filter_by(id_questao=question.identificador).first()
         respostaold.resposta = newanswer
         session.add(respostaold)
         session.add(question)
@@ -280,7 +354,7 @@ def update_form(session, userlogged):
 
     pass
 
-def handle_update():
+def handle_update(session, userlogged):
     pass
 
 
